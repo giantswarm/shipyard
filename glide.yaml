@@ -1,0 +1,4 @@
+package: github.com/giantswarm/shipyard
+import:
+- package: github.com/kubernetes/dns/pkg/e2e
+  version: 1.14.4
