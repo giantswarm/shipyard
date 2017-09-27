@@ -1,6 +1,6 @@
 package: github.com/giantswarm/shipyard
 import:
 - package: github.com/giantswarm/micrologger
-  version: 8a69b2ab80ba2d0bd40d609206518fefacfc8fdf
+  version: master
 - package: github.com/giantswarm/microstorage
-  version: e990a46ff7c9065f8d83c0a649cb1a6ef5d411d7
+  version: master
