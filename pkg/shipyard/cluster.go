@@ -12,7 +12,7 @@ const (
 	startupTimeout = 10 * time.Second
 )
 
-// Cluster encapsulates a mock Kubernetes Cluster.
+// Cluster encapsulates a mock Kubernetes cluster.
 type Cluster struct {
 	Options
 	Docker Docker
@@ -29,7 +29,7 @@ type Cluster struct {
 	varRun        string
 }
 
-// SetUp the e2e Cluster.
+// SetUp the e2e cluster.
 func (cl *Cluster) SetUp() {
 	Log.Logf("SetUp")
 
@@ -43,7 +43,7 @@ func (cl *Cluster) SetUp() {
 	cl.WaitForApiServer()
 }
 
-// TearDown the e2e Cluster.
+// TearDown the e2e cluster.
 func (cl *Cluster) TearDown() {
 	Log.Logf("Teardown")
 
@@ -55,7 +55,7 @@ func (cl *Cluster) TearDown() {
 func (cl *Cluster) resolveDirs() {
 	// TODO: directories should be configurable, but there seem to be issues with the
 	// the nsenter mounter that prevent us from moving the location of /var/lib/kubelet.
-	cl.manifestDir = fmt.Sprintf("%v/test/e2e/Cluster/manifests", cl.BaseDir)
+	cl.manifestDir = fmt.Sprintf("%v/test/e2e/cluster/manifests", cl.BaseDir)
 	cl.varLibDocker = "/var/lib/docker"
 	cl.varLibKubelet = "/var/lib/kubelet"
 	cl.varRun = "/var/run"
@@ -118,7 +118,7 @@ func (cl *Cluster) StartApiServer() {
 		cl.HyperkubeImage,
 		"/hyperkube", "apiserver",
 		"--insecure-bind-address=0.0.0.0",
-		"--service-Cluster-ip-range=10.0.0.1/24",
+		"--service-cluster-ip-range=10.0.0.1/24",
 		"--etcd_servers=http://127.0.0.1:2379",
 		"--v=2")
 }
@@ -176,8 +176,8 @@ func (cl *Cluster) StartKubelet() {
 		"--containerized",
 		"--hostname-override=0.0.0.0",
 		"--address=0.0.0.0",
-		"--Cluster_dns=10.0.0.10",
-		"--Cluster_domain=Cluster.local",
+		"--cluster_dns=10.0.0.10",
+		"--cluster_domain=cluster.local",
 		"--api-servers=http://localhost:8080",
 		"--config=/etc/kubernetes/manifests-e2e",
 	}
