@@ -112,31 +112,3 @@ func (fr *Framework) StdoutLogfile(name string) string {
 func (fr *Framework) StderrLogfile(name string) string {
 	return fmt.Sprintf("%v/logs/%v.err", fr.Options.WorkDir, name)
 }
-
-// RunInBackground starts the given process in the background, redirecting the
-// output of the process to external log files.
-func (fr *Framework) RunInBackground(name string, binary string, args ...string) (*exec.Cmd, error) {
-	Log.Logf("Starting %v (%v %v)", name, binary, args)
-
-	if _, ok := fr.Processes[name]; ok {
-		Log.Fatalf("Cannot run more than one process with the same name: %v", name)
-	}
-
-	cmd := exec.Command(binary, args...)
-
-	if stdout, err := os.Create(fr.StdoutLogfile(name)); err == nil {
-		cmd.Stdout = stdout
-	} else {
-		Log.Fatalf("Could not create %v: %v", fr.StdoutLogfile(name), err)
-	}
-
-	if stderr, err := os.Create(fr.StderrLogfile(name)); err == nil {
-		cmd.Stderr = stderr
-	} else {
-		Log.Fatalf("Could not create %v: %v", fr.StderrLogfile(name), err)
-	}
-
-	fr.Processes[name] = cmd
-
-	return cmd, cmd.Start()
-}
