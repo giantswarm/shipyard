@@ -1,6 +1,10 @@
-hash: 9cf0c6d2c0d506b3c2bedb4a73973aaed1ed839ca7efddc498fb5099000ede88
-updated: 2017-09-15T16:02:12.254796063+02:00
+hash: 9332a59665d90f4b097b59d4a71f98c6e5509057dc1ba1d8a730a0e38034c5d3
+updated: 2017-09-27T16:35:26.710607228+02:00
 imports:
+- name: github.com/giantswarm/micrologger
+  version: 8a69b2ab80ba2d0bd40d609206518fefacfc8fdf
+- name: github.com/giantswarm/microstorage
+  version: e990a46ff7c9065f8d83c0a649cb1a6ef5d411d7
 - name: github.com/kubernetes/dns
   version: ee838f6705436f2fdad3ae82cca74053ec547002
   subpackages:

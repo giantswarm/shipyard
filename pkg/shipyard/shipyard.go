@@ -4,11 +4,9 @@ import (
 	"log"
 	"os"
 	"path/filepath"
-
-	"github.com/kubernetes/dns/pkg/e2e"
 )
 
-var fr *e2e.Framework
+var fr *Framework
 
 // Start spins up a minimal k8s cluster in 3 docker containers based on the
 // hyperkube image, kube-apiserver, etcd and kubelet
@@ -23,8 +21,8 @@ func Start(workDir string) {
 		log.Fatalf("Error getting base directory: %v", err)
 	}
 
-	e2e.InitFramework(baseDir, workDir)
-	fr = e2e.GetFramework()
+	InitFramework(baseDir, workDir)
+	fr = GetFramework()
 	fr.SetUp()
 }
 
