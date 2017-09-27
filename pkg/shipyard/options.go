@@ -1,8 +1,8 @@
 package shipyard
 
 const (
-	etcdImage      = "quay.io/coreos/etcd:v3.0.14"
-	hyperkubeImage = "gcr.io/google_containers/hyperkube:v1.5.1"
+	etcdImage      = "quay.io/coreos/etcd:v3.2.7"
+	hyperkubeImage = "gcr.io/google_containers/hyperkube:v1.7.6"
 )
 
 type Options struct {

@@ -178,8 +178,8 @@ func (cl *Cluster) StartKubelet() {
 		"--address=0.0.0.0",
 		"--cluster_dns=10.0.0.10",
 		"--cluster_domain=cluster.local",
-		"--api-servers=http://localhost:8080",
-		"--config=/etc/kubernetes/manifests-e2e",
+		fmt.Sprintf("--kubeconfig=%s/test/e2e/cluster/", cl.BaseDir),
+		"--pod-manifest-path=/etc/kubernetes/manifests-e2e",
 	}
 
 	cl.containers.kubelet = cl.Docker.Run(args...)
