@@ -1,8 +1,22 @@
-hash: a96412a7e681fa8c42e646809bd7131423562a2c4b66d98a92c655c2de76c023
-updated: 2017-09-27T17:37:25.482100355+02:00
+hash: 2e76cefab733532bb0f8adda012fbf5dcfcf55bfd251ac68d5b1cf53652f3fbf
+updated: 2017-09-28T13:17:04.793962927+02:00
 imports:
+- name: github.com/giantswarm/microerror
+  version: 5ade94eb4ee35ef72eb9382228470caeddb29989
 - name: github.com/giantswarm/micrologger
   version: 8a69b2ab80ba2d0bd40d609206518fefacfc8fdf
 - name: github.com/giantswarm/microstorage
   version: e990a46ff7c9065f8d83c0a649cb1a6ef5d411d7
+- name: github.com/go-kit/kit
+  version: a9ca6725cbbea455e61c6bc8a1ed28e81eb3493b
+  subpackages:
+  - log
+- name: github.com/go-logfmt/logfmt
+  version: 390ab7935ee28ec6b286364bba9b4dd6410cb3d5
+- name: github.com/go-stack/stack
+  version: 100eb0c0a9c5b306ca2fb4f165df21d80ada4b82
+- name: github.com/juju/errgo
+  version: 08cceb5d0b5331634b9826762a8fd53b29b86ad8
+- name: github.com/kr/logfmt
+  version: b84e30acd515aadc4b783ad4ff83aff3299bdfe0
 testImports: []

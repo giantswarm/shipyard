@@ -6,7 +6,6 @@ const (
 )
 
 type Options struct {
-	Prefix  string
 	Docker  string
 	Kubectl string
 
@@ -21,7 +20,6 @@ type Options struct {
 // DefaultOptions to use to run the e2e test.
 func DefaultOptions(baseDir string, workDir string) Options {
 	ret := Options{
-		Prefix:  "xxx",
 		Kubectl: "kubectl",
 
 		BaseDir: baseDir,

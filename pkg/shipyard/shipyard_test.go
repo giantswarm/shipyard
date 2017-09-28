@@ -2,7 +2,6 @@ package shipyard_test
 
 import (
 	"io/ioutil"
-	"log"
 	"net/http"
 	"os"
 	"testing"
@@ -11,18 +10,27 @@ import (
 )
 
 func TestAPIUp(t *testing.T) {
+	var err error
+
 	workDir, err := ioutil.TempDir("", "gs-shipyard")
 	if err != nil {
-		log.Fatalf("Error creating working directory: %v", err)
+		t.Fatalf("Could not create working directory: %v", err)
 	}
 	defer os.RemoveAll(workDir)
 
-	shipyard.Start(workDir)
-	defer shipyard.Stop()
+	sy, err := shipyard.New(workDir)
+	if err != nil {
+		t.Fatalf("Could not start cluster: %v", err)
+	}
+
+	if err = sy.Start(); err != nil {
+		t.Fatalf("could not start framework, %v", err)
+	}
+	defer sy.Stop()
 
 	_, err = http.Get("http://127.0.0.1:8080")
 	if err != nil {
-		t.Errorf("error accesing api, %v", err)
+		t.Fatalf("could not access api, %v", err)
 	}
 }
 
