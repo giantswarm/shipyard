@@ -19,7 +19,7 @@ type Options struct {
 
 // DefaultOptions to use to run the e2e test.
 func DefaultOptions(baseDir string, workDir string) Options {
-	ret := Options{
+	return Options{
 		Kubectl: "kubectl",
 
 		BaseDir: baseDir,
@@ -30,6 +30,4 @@ func DefaultOptions(baseDir string, workDir string) Options {
 		HyperkubeImage: hyperkubeImage,
 		ClusterIpRange: "10.0.0.0/24",
 	}
-
-	return ret
 }

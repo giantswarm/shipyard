@@ -11,7 +11,6 @@ import (
 // Shipyard is a framework for e2e testing.
 type Shipyard struct {
 	options Options
-	docker  Docker
 	cluster Cluster
 }
 
@@ -38,7 +37,6 @@ func New(workDir string) (*Shipyard, error) {
 
 	shipyard = &Shipyard{
 		options: options,
-		docker:  docker,
 		cluster: Cluster{
 			Options: options,
 			Docker:  docker,
@@ -52,17 +50,9 @@ func New(workDir string) (*Shipyard, error) {
 	return shipyard, nil
 }
 
-// Get returns the global framework.
-func Get() (*Shipyard, error) {
-	if shipyard == nil {
-		return nil, fmt.Errorf("Init must be called before use")
-	}
-	return shipyard, nil
-}
-
 // Start spins up a minimal k8s cluster in 3 base docker containers based on the
 // hyperkube image, kube-apiserver, etcd and kubelet and 2 additional static
-// pods running in the kubelet, controller-manager and scheduler
+// pods running in the kubelet, controller-manager and scheduler.
 func (sy *Shipyard) Start() error {
 	return sy.cluster.SetUp()
 }
