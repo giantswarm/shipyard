@@ -16,7 +16,7 @@ func Start(workDir string) {
 		log.Fatalf("Error getting working directory: %v", err)
 	}
 
-	baseDir, err := filepath.Abs(pkgDir + "../..")
+	baseDir, err := filepath.Abs(pkgDir + "../../..")
 	if err != nil {
 		log.Fatalf("Error getting base directory: %v", err)
 	}

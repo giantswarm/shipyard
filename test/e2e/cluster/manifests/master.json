@@ -23,7 +23,7 @@
         ],
         "volumeMounts": [
           {
-            "name": "data",
+            "name": "srvkube",
             "mountPath": "/srv/kubernetes"
           }
         ]
@@ -38,26 +38,14 @@
           "--leader-elect=true",
           "--v=2"
         ]
-      },
-      {
-        "name": "setup",
-        "image": "gcr.io/google_containers/hyperkube-amd64:v1.7.6",
-        "command": [
-          "/setup-files.sh",
-          "IP:10.0.0.1,DNS:kubernetes,DNS:kubernetes.default,DNS:kubernetes.default.svc,DNS:kubernetes.default.svc.cluster.local"
-        ],
-        "volumeMounts": [
-          {
-            "name": "data",
-            "mountPath": "/srv/kubernetes"
-          }
-        ]
       }
     ],
     "volumes": [
       {
-        "name": "data",
-        "emptyDir": {}
+        "name": "srvkube",
+          "hostPath": {
+            "path": "/srv/kubernetes"
+          }
       }
     ]
   }

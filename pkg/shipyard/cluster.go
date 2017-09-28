@@ -24,6 +24,7 @@ type Cluster struct {
 	}
 
 	manifestDir   string
+	certDir       string
 	varLibDocker  string
 	varLibKubelet string
 	varRun        string
@@ -56,6 +57,7 @@ func (cl *Cluster) resolveDirs() {
 	// TODO: directories should be configurable, but there seem to be issues with the
 	// the nsenter mounter that prevent us from moving the location of /var/lib/kubelet.
 	cl.manifestDir = fmt.Sprintf("%v/test/e2e/cluster/manifests", cl.BaseDir)
+	cl.certDir = fmt.Sprintf("%v/test/e2e/cluster/cert", cl.BaseDir)
 	cl.varLibDocker = "/var/lib/docker"
 	cl.varLibKubelet = "/var/lib/kubelet"
 	cl.varRun = "/var/run"
@@ -164,6 +166,7 @@ func (cl *Cluster) StartKubelet() {
 		fmt.Sprintf("--volume=%v:/src:ro", cl.BaseDir),
 		fmt.Sprintf("--volume=%v:/data:rw", cl.WorkDir),
 		fmt.Sprintf("--volume=%v:/etc/kubernetes/manifests-e2e:ro", cl.manifestDir),
+		fmt.Sprintf("--volume=%v:/srv/kubernetes:ro", cl.certDir),
 		fmt.Sprintf("--volume=%v:/var/lib/docker:rw", cl.varLibDocker),
 		fmt.Sprintf("--volume=%v:/var/run:rw", cl.varRun),
 		fmt.Sprintf("--volume=%v:/var/lib/kubelet:shared", cl.varLibKubelet),
@@ -178,7 +181,8 @@ func (cl *Cluster) StartKubelet() {
 		"--address=0.0.0.0",
 		"--cluster_dns=10.0.0.10",
 		"--cluster_domain=cluster.local",
-		fmt.Sprintf("--kubeconfig=%s/test/e2e/cluster/", cl.BaseDir),
+		"--require-kubeconfig",
+		"--kubeconfig=/src/test/e2e/cluster/config",
 		"--pod-manifest-path=/etc/kubernetes/manifests-e2e",
 	}
 
