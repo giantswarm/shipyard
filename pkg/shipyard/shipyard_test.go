@@ -1,15 +1,23 @@
 package shipyard_test
 
 import (
+	"context"
 	"io/ioutil"
 	"net/http"
 	"os"
+	"path/filepath"
 	"testing"
 
+	"github.com/giantswarm/micrologger/microloggertest"
+	"github.com/giantswarm/microstorage/storagetest"
 	"github.com/giantswarm/shipyard/pkg/shipyard"
+	"github.com/giantswarm/tprstorage"
+
+	"k8s.io/client-go/kubernetes"
+	"k8s.io/client-go/tools/clientcmd"
 )
 
-func TestAPIUp(t *testing.T) {
+func TestShipyard(t *testing.T) {
 	var err error
 
 	workDir, err := ioutil.TempDir("", "gs-shipyard")
@@ -28,45 +36,21 @@ func TestAPIUp(t *testing.T) {
 	}
 	defer sy.Stop()
 
-	_, err = http.Get("http://127.0.0.1:8080")
-	if err != nil {
-		t.Fatalf("could not access api, %v", err)
-	}
-}
+	t.Run("API up", func(t *testing.T) {
+		_, err = http.Get("http://127.0.0.1:8080")
+		if err != nil {
+			t.Fatalf("could not access api, %v", err)
+		}
+	})
 
-/*
-func TestTPRStorage(t *testing.T) {
-	workDir, err := ioutil.TempDir("", "gs-shipyard")
-	if err != nil {
-		log.Fatalf("Error creating working directory: %v", err)
-	}
-	defer os.RemoveAll(workDir)
+	t.Run("tpr storage example", func(t *testing.T) {
+		k8sClient, err := getK8sClient()
+		if err != nil {
+			t.Fatalf("error creating K8s client: %#v", err)
+		}
 
-	shipyard.Start(workDir)
-	defer shipyard.Stop()
+		var storage *tprstorage.Storage
 
-	cfgDir, err := os.Getwd()
-	if err != nil {
-		t.Fatalf("error getting config directory: %v", err)
-	}
-
-	kubeconfig, err := filepath.Abs(cfgDir + "../../test/e2e/cluster/config")
-	if err != nil {
-		t.Fatalf("Error getting base directory: %v", err)
-	}
-
-	config, err := clientcmd.BuildConfigFromFlags("", kubeconfig)
-	if err != nil {
-		t.Fatalf("error creating k8s config %#v", err)
-	}
-
-	k8sClient, err := kubernetes.NewForConfig(config)
-	if err != nil {
-		t.Fatalf("error creating K8s client: %#v", err)
-	}
-
-	var storage *tprstorage.Storage
-	{
 		config := tprstorage.DefaultConfig()
 		config.K8sClient = k8sClient
 		config.Logger = microloggertest.New()
@@ -78,20 +62,33 @@ func TestTPRStorage(t *testing.T) {
 			t.Fatalf("error creating storage: %#v", err)
 		}
 
-		defer func() {
-			path := path.Join(storage.tpr.Endpoint(config.TPO.Namespace), config.TPO.Name)
-			_, err := k8sClient.CoreV1().RESTClient().Delete().AbsPath(path).DoRaw()
-			if err != nil {
-				t.Logf("error cleaning up TPO %s/%s: %#v", config.TPO.Namespace, config.TPO.Name, err)
-			}
-		}()
-	}
+		err = storage.Boot(context.TODO())
+		if err != nil {
+			t.Fatalf("error booting storage: %#v", err)
+		}
 
-	err = storage.Boot(context.TODO())
-	if err != nil {
-		t.Fatalf("error booting storage: %#v", err)
-	}
-
-	storagetest.Test(t, storage)
+		storagetest.Test(t, storage)
+	})
 }
-*/
+
+func getK8sClient() (*kubernetes.Clientset, error) {
+	pkgDir, err := os.Getwd()
+	if err != nil {
+		return nil, err
+	}
+
+	baseDir, err := filepath.Abs(pkgDir + "../../..")
+	if err != nil {
+		return nil, err
+	}
+
+	kubeconfig := filepath.Join(baseDir, "test/e2e/cluster/config")
+
+	config, err := clientcmd.BuildConfigFromFlags("", kubeconfig)
+	if err != nil {
+		return nil, err
+	}
+
+	// create the clientset
+	return kubernetes.NewForConfig(config)
+}
