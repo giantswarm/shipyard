@@ -36,14 +36,16 @@ type Cluster struct {
 func (cl *Cluster) SetUp() error {
 	Log.Log("debug", "SetUp")
 
-	tasks := []taskFn{cl.resolveDirs, cl.pullImages, cl.startEtcd, cl.startApiServer, cl.startKubelet, cl.waitForApiServer}
-
-	for _, task := range tasks {
-		if err := task(); err != nil {
-			return err
-		}
+	tasks := []taskFn{
+		cl.resolveDirs,
+		cl.pullImages,
+		cl.startEtcd,
+		cl.startApiServer,
+		cl.startKubelet,
+		cl.waitForApiServer,
 	}
-	return nil
+
+	return runTasks(tasks)
 }
 
 // TearDown the e2e cluster.
@@ -52,6 +54,10 @@ func (cl *Cluster) TearDown() error {
 
 	tasks := []taskFn{cl.stopKubelet, cl.stopApiServer, cl.stopEtcd}
 
+	return runTasks(tasks)
+}
+
+func runTasks(tasks []taskFn) error {
 	for _, task := range tasks {
 		if err := task(); err != nil {
 			return err

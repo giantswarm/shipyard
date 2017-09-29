@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
-	"path/filepath"
 	"time"
 )
 
@@ -20,7 +19,7 @@ var shipyard *Shipyard
 func New(workDir string) (*Shipyard, error) {
 	var err error
 
-	baseDir, err := getBaseDir()
+	baseDir, err := PrepareBaseDir()
 	if err != nil {
 		return nil, err
 	}
@@ -60,19 +59,6 @@ func (sy *Shipyard) Start() error {
 // Stop finalizes the cluster and removes the working dir
 func (sy *Shipyard) Stop() error {
 	return sy.cluster.TearDown()
-}
-
-func getBaseDir() (string, error) {
-	pkgDir, err := os.Getwd()
-	if err != nil {
-		return "", err
-	}
-
-	baseDir, err := filepath.Abs(pkgDir + "../../..")
-	if err != nil {
-		return "", err
-	}
-	return baseDir, nil
 }
 
 // canSudo returns true if the sudo command is allowed without a password.
