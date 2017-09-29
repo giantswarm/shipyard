@@ -188,11 +188,6 @@ func (cl *Cluster) startKubelet() error {
 		return err
 	}
 
-	err = makeSharedMount(cl.varLibKubelet)
-	if err != nil {
-		return err
-	}
-
 	args := []string{
 		"-d",
 		"--volume=/:/rootfs:ro", // This is used by the nsenter mounter.
@@ -204,7 +199,7 @@ func (cl *Cluster) startKubelet() error {
 		fmt.Sprintf("--volume=%v:/srv/kubernetes:ro", cl.certDir),
 		fmt.Sprintf("--volume=%v:/var/lib/docker:rw", cl.varLibDocker),
 		fmt.Sprintf("--volume=%v:/var/run:rw", cl.varRun),
-		fmt.Sprintf("--volume=%v:/var/lib/kubelet:shared", cl.varLibKubelet),
+		fmt.Sprintf("--volume=%v:/var/lib/kubelet:rw", cl.varLibKubelet),
 		"--net=host",
 		"--pid=host",
 		"--privileged=true",
@@ -247,25 +242,7 @@ func (cl *Cluster) stopKubelet() error {
 		}
 	}
 
-	if err = umount(cl.varLibKubelet); err != nil {
-		return err
-	}
-
 	if err = exec.Command("sudo", "rm", "-rf", cl.varLibKubelet).Run(); err != nil {
-		return err
-	}
-	return nil
-}
-
-func umount(path string) error {
-	return exec.Command("sudo", "umount", path).Run()
-}
-
-func makeSharedMount(path string) error {
-	if err := exec.Command("sudo", "mount", "--bind", path, path).Run(); err != nil {
-		return err
-	}
-	if err := exec.Command("sudo", "mount", "--make-rshared", path).Run(); err != nil {
 		return err
 	}
 	return nil
