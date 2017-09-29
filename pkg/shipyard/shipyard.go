@@ -14,6 +14,7 @@ import (
 // Shipyard is a framework for e2e testing.
 type Shipyard struct {
 	cluster *cluster.Cluster
+	cancel  chan struct{}
 }
 
 // New initializes the global framework.
@@ -34,7 +35,8 @@ func New() (*Shipyard, error) {
 	logger.Log("debug", fmt.Sprintf("Creating framework (baseDir=%v)", baseDir))
 	logger.Log("debug", fmt.Sprintf("It can be accessed with 'kubectl --kubeconfig %s/kubernetes/config ...'", baseDir))
 
-	keepSudoActive(logger)
+	ch := make(chan struct{})
+	keepSudoActive(logger, ch)
 
 	docker := docker.New(logger)
 
@@ -42,6 +44,7 @@ func New() (*Shipyard, error) {
 
 	shipyard := &Shipyard{
 		cluster: cl,
+		cancel:  ch,
 	}
 
 	return shipyard, nil
@@ -56,6 +59,7 @@ func (sy *Shipyard) Start() error {
 
 // Stop finalizes the cluster and removes the working dir
 func (sy *Shipyard) Stop() error {
+	close(sy.cancel)
 	return sy.cluster.TearDown()
 }
 
@@ -67,11 +71,18 @@ func canSudo() bool {
 
 // keepSudoActive periodically updates the sudo timestamp so we can keep
 // running sudo.
-func keepSudoActive(logger micrologger.Logger) {
+func keepSudoActive(logger micrologger.Logger, cancel <-chan struct{}) {
 	go func() {
-		if err := exec.Command("sudo", "-nv").Run(); err != nil {
-			logger.Log("debug", "Unable to keep sudo active: %v", err)
+		for {
+			select {
+			case <-cancel:
+				return
+			default:
+				if err := exec.Command("sudo", "-nv").Run(); err != nil {
+					logger.Log("debug", "Unable to keep sudo active: %v", err)
+				}
+				time.Sleep(10 * time.Second)
+			}
 		}
-		time.Sleep(10 * time.Second)
 	}()
 }
