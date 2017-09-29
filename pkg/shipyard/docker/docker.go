@@ -1,4 +1,4 @@
-package shipyard
+package docker
 
 import (
 	"os/exec"
@@ -22,8 +22,8 @@ type Docker interface {
 	List(filter string) ([]string, error)
 }
 
-// NewDocker returns a Docker for the default instance running on the host.
-func NewDocker(logger micrologger.Logger) Docker {
+// New returns a Docker for the default instance running on the host.
+func New(logger micrologger.Logger) Docker {
 	return &dockerWrapper{
 		logger:     logger,
 		dockerExec: "docker",

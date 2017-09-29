@@ -2,51 +2,46 @@ package shipyard
 
 import (
 	"fmt"
-	"os"
 	"os/exec"
 	"time"
 
 	"github.com/giantswarm/micrologger"
+	"github.com/giantswarm/shipyard/pkg/shipyard/cluster"
+	"github.com/giantswarm/shipyard/pkg/shipyard/docker"
+	"github.com/giantswarm/shipyard/pkg/shipyard/files"
 )
 
 // Shipyard is a framework for e2e testing.
 type Shipyard struct {
-	cluster Cluster
+	cluster *cluster.Cluster
 }
 
-var shipyard *Shipyard
-
 // New initializes the global framework.
-func New(workDir string) (*Shipyard, error) {
+func New() (*Shipyard, error) {
+	if !canSudo() {
+		return nil, fmt.Errorf("e2e test requires `sudo` to be active. Run `sudo -v` before running the e2e test.")
+	}
+
 	var err error
 
-	baseDir, err := PrepareBaseDir()
+	baseDir, err := files.Init()
 	if err != nil {
 		return nil, err
 	}
 
 	logger, _ := micrologger.New(micrologger.DefaultConfig())
 
-	logger.Log("debug", fmt.Sprintf("Creating framework (baseDir=%v, workDir=%v)", baseDir, workDir))
+	logger.Log("debug", fmt.Sprintf("Creating framework (baseDir=%v)", baseDir))
 	logger.Log("debug", fmt.Sprintf("It can be accessed with 'kubectl --kubeconfig %s/kubernetes/config ...'", baseDir))
 
-	if !canSudo() {
-		return nil, fmt.Errorf("e2e test requires `sudo` to be active. Run `sudo -v` before running the e2e test.")
-	}
 	keepSudoActive(logger)
 
-	config := DefaultConfig(baseDir, workDir, logger)
-	docker := NewDocker(logger)
+	docker := docker.New(logger)
 
-	shipyard = &Shipyard{
-		cluster: Cluster{
-			Config: config,
-			Docker: docker,
-		},
-	}
+	cl := cluster.New(baseDir, logger, docker)
 
-	if err := os.MkdirAll(workDir+"/logs", 0755); err != nil {
-		return nil, fmt.Errorf("Could not mkdir %v: %v", workDir, err)
+	shipyard := &Shipyard{
+		cluster: cl,
 	}
 
 	return shipyard, nil

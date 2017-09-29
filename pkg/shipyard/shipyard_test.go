@@ -2,15 +2,14 @@ package shipyard_test
 
 import (
 	"context"
-	"io/ioutil"
 	"net/http"
-	"os"
 	"path/filepath"
 	"testing"
 
 	"github.com/giantswarm/micrologger/microloggertest"
 	"github.com/giantswarm/microstorage/storagetest"
 	"github.com/giantswarm/shipyard/pkg/shipyard"
+	"github.com/giantswarm/shipyard/pkg/shipyard/files"
 	"github.com/giantswarm/tprstorage"
 
 	"k8s.io/client-go/kubernetes"
@@ -20,13 +19,7 @@ import (
 func TestShipyard(t *testing.T) {
 	var err error
 
-	workDir, err := ioutil.TempDir("", "gs-shipyard")
-	if err != nil {
-		t.Fatalf("Could not create working directory: %v", err)
-	}
-	defer os.RemoveAll(workDir)
-
-	sy, err := shipyard.New(workDir)
+	sy, err := shipyard.New()
 	if err != nil {
 		t.Fatalf("Could not start cluster: %v", err)
 	}
@@ -72,7 +65,7 @@ func TestShipyard(t *testing.T) {
 }
 
 func getK8sClient() (*kubernetes.Clientset, error) {
-	baseDir, err := shipyard.PrepareBaseDir()
+	baseDir, err := files.Init()
 	if err != nil {
 		return nil, err
 	}

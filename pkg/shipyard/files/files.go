@@ -1,4 +1,4 @@
-package shipyard
+package files
 
 import (
 	"io/ioutil"
@@ -257,8 +257,8 @@ mUI8p41+CZ+edrvtyS1Sj4s=
 `
 )
 
-// PrepareBaseDir creates the base directory and required files for shipyard to run
-func PrepareBaseDir() (string, error) {
+// Init sets up the required directories and files, returning the name of the base dir
+func Init() (string, error) {
 	baseDir, err := ioutil.TempDir("", "gs-shipyard")
 	if err != nil {
 		return "", err
@@ -283,6 +283,5 @@ func PrepareBaseDir() (string, error) {
 			return "", err
 		}
 	}
-
 	return baseDir, nil
 }

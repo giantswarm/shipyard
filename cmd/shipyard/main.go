@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"io/ioutil"
 	"os"
 	"os/signal"
 	"syscall"
@@ -11,24 +10,17 @@ import (
 )
 
 func main() {
-	sigs := make(chan os.Signal, 1)
-	done := make(chan bool, 1)
-
-	workDir, err := ioutil.TempDir("", "gs-shipyard")
-	if err != nil {
-		fmt.Printf("Could not create working directory: %v\n", err)
-		os.Exit(1)
-	}
-	defer os.RemoveAll(workDir)
+	sigs := make(chan os.Signal)
+	done := make(chan struct{})
 
 	signal.Notify(sigs, syscall.SIGINT, syscall.SIGTERM)
 
 	go func() {
 		<-sigs
-		done <- true
+		close(done)
 	}()
 
-	sy, err := shipyard.New(workDir)
+	sy, err := shipyard.New()
 	if err != nil {
 		fmt.Printf("Could not create shipyard: %v\n", err)
 		os.Exit(1)

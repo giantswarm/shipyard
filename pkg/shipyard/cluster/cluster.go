@@ -1,4 +1,4 @@
-package shipyard
+package cluster
 
 import (
 	"fmt"
@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/giantswarm/micrologger"
+	"github.com/giantswarm/shipyard/pkg/shipyard/docker"
 )
 
 const (
@@ -21,36 +22,18 @@ type taskFn func() error
 type Config struct {
 	logger micrologger.Logger
 
-	Docker  string
 	Kubectl string
 
 	BaseDir string
-	WorkDir string
 
 	EtcdImage      string
 	HyperkubeImage string
 }
 
-// DefaultConfig to use to run the e2e test.
-func DefaultConfig(baseDir string, workDir string, logger micrologger.Logger) Config {
-	return Config{
-		logger: logger,
-
-		Kubectl: "kubectl",
-
-		BaseDir: baseDir,
-		WorkDir: workDir,
-
-		Docker:         "docker",
-		EtcdImage:      etcdImage,
-		HyperkubeImage: hyperkubeImage,
-	}
-}
-
 // Cluster encapsulates a mock Kubernetes cluster.
 type Cluster struct {
 	Config
-	Docker Docker
+	Docker docker.Docker
 
 	containers struct {
 		etcd    string
@@ -63,6 +46,30 @@ type Cluster struct {
 	varLibDocker  string
 	varLibKubelet string
 	varRun        string
+}
+
+// defaultConfig to use to run the e2e test.
+func defaultConfig(baseDir string, logger micrologger.Logger) Config {
+	return Config{
+		logger: logger,
+
+		Kubectl: "kubectl",
+
+		BaseDir: baseDir,
+
+		EtcdImage:      etcdImage,
+		HyperkubeImage: hyperkubeImage,
+	}
+}
+
+// New is the cluster initializer
+func New(baseDir string, logger micrologger.Logger, docker docker.Docker) *Cluster {
+	config := defaultConfig(baseDir, logger)
+
+	return &Cluster{
+		Config: config,
+		Docker: docker,
+	}
 }
 
 // SetUp the e2e cluster.
@@ -169,7 +176,6 @@ func (cl *Cluster) startAPIServer() error {
 	cl.containers.api, err = cl.Docker.Run(
 		"-d",
 		fmt.Sprintf("--volume=%v:/src:ro", cl.BaseDir),
-		fmt.Sprintf("--volume=%v:/data:rw", cl.WorkDir),
 		"--net=host",
 		"--pid=host",
 		cl.HyperkubeImage,
@@ -227,7 +233,6 @@ func (cl *Cluster) startKubelet() error {
 		"--volume=/sys:/sys:ro",
 		"--volume=/dev:/dev",
 		fmt.Sprintf("--volume=%v:/src:ro", cl.BaseDir),
-		fmt.Sprintf("--volume=%v:/data:rw", cl.WorkDir),
 		fmt.Sprintf("--volume=%v:/etc/kubernetes/manifests-e2e:ro", cl.manifestDir),
 		fmt.Sprintf("--volume=%v:/srv/kubernetes:ro", cl.certDir),
 		fmt.Sprintf("--volume=%v:/var/lib/docker:rw", cl.varLibDocker),
