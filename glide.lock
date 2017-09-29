@@ -1,5 +1,5 @@
 hash: 68e29cd020a74b03b258dec84a6efa720cffaf36aafaecae07e98621aea99d74
-updated: 2017-09-28T17:12:38.562237813+02:00
+updated: 2017-09-29T15:08:04.498149867+02:00
 imports:
 - name: github.com/giantswarm/microerror
   version: 5ade94eb4ee35ef72eb9382228470caeddb29989
@@ -217,7 +217,6 @@ testImports:
 - name: k8s.io/apimachinery
   version: 85ace5365f33b16fc735c866a12e3c765b9700f2
   subpackages:
-  - pkg/api/equality
   - pkg/api/errors
   - pkg/api/meta
   - pkg/api/resource
@@ -244,20 +243,16 @@ testImports:
   - pkg/util/diff
   - pkg/util/errors
   - pkg/util/framer
-  - pkg/util/httpstream
   - pkg/util/intstr
   - pkg/util/json
-  - pkg/util/mergepatch
   - pkg/util/net
   - pkg/util/rand
   - pkg/util/runtime
   - pkg/util/sets
-  - pkg/util/strategicpatch
   - pkg/util/validation
   - pkg/util/validation/field
   - pkg/util/wait
   - pkg/util/yaml
   - pkg/version
   - pkg/watch
-  - third_party/forked/golang/json
   - third_party/forked/golang/reflect
