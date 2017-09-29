@@ -69,8 +69,8 @@ func runTasks(tasks []taskFn) error {
 func (cl *Cluster) resolveDirs() error {
 	// TODO: directories should be configurable, but there seem to be issues with the
 	// the nsenter mounter that prevent us from moving the location of /var/lib/kubelet.
-	cl.manifestDir = fmt.Sprintf("%v/test/e2e/cluster/manifests", cl.BaseDir)
-	cl.certDir = fmt.Sprintf("%v/test/e2e/cluster/cert", cl.BaseDir)
+	cl.manifestDir = fmt.Sprintf("%v/kubernetes/manifests", cl.BaseDir)
+	cl.certDir = fmt.Sprintf("%v/kubernetes/cert", cl.BaseDir)
 	cl.varLibDocker = "/var/lib/docker"
 	cl.varLibKubelet = "/var/lib/kubelet"
 	cl.varRun = "/var/run"
@@ -217,7 +217,7 @@ func (cl *Cluster) startKubelet() error {
 		"--cluster_dns=10.0.0.10",
 		"--cluster_domain=cluster.local",
 		"--require-kubeconfig",
-		"--kubeconfig=/src/test/e2e/cluster/config",
+		"--kubeconfig=/src/kubernetes/config",
 		"--pod-manifest-path=/etc/kubernetes/manifests-e2e",
 	}
 

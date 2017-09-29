@@ -72,17 +72,12 @@ func TestShipyard(t *testing.T) {
 }
 
 func getK8sClient() (*kubernetes.Clientset, error) {
-	pkgDir, err := os.Getwd()
+	baseDir, err := shipyard.PrepareBaseDir()
 	if err != nil {
 		return nil, err
 	}
 
-	baseDir, err := filepath.Abs(pkgDir + "../../..")
-	if err != nil {
-		return nil, err
-	}
-
-	kubeconfig := filepath.Join(baseDir, "test/e2e/cluster/config")
+	kubeconfig := filepath.Join(baseDir, "kubernetes/config")
 
 	config, err := clientcmd.BuildConfigFromFlags("", kubeconfig)
 	if err != nil {

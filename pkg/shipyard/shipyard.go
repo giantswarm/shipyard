@@ -25,6 +25,7 @@ func New(workDir string) (*Shipyard, error) {
 	}
 
 	Log.Log("debug", fmt.Sprintf("Creating framework (baseDir=%v, workDir=%v)", baseDir, workDir))
+	Log.Log("debug", fmt.Sprintf("It can be accessed with 'kubectl --kubeconfig %s/kubernetes/config ...'", baseDir))
 
 	if !canSudo() {
 		return nil, fmt.Errorf("e2e test requires `sudo` to be active. Run `sudo -v` before running the e2e test.")

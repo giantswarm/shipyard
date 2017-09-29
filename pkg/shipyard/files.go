@@ -265,12 +265,12 @@ func PrepareBaseDir() (string, error) {
 	}
 
 	files := map[string]string{
-		"test/e2e/cluster/config":                       kubeconfig,
-		"test/e2e/cluster/cert/ca.crt":                  caCrt,
-		"test/e2e/cluster/cert/server.cert":             serverCert,
-		"test/e2e/cluster/cert/server.key":              serverKey,
-		"test/e2e/cluster/manifests/addon-manager.json": addonManagerManifest,
-		"test/e2e/cluster/manifests/master.json":        masterManifest,
+		"kubernetes/config":                       kubeconfig,
+		"kubernetes/cert/ca.crt":                  caCrt,
+		"kubernetes/cert/server.cert":             serverCert,
+		"kubernetes/cert/server.key":              serverKey,
+		"kubernetes/manifests/addon-manager.json": addonManagerManifest,
+		"kubernetes/manifests/master.json":        masterManifest,
 	}
 
 	for relPath, content := range files {
