@@ -5,11 +5,12 @@ import (
 	"os"
 	"os/exec"
 	"time"
+
+	"github.com/giantswarm/micrologger"
 )
 
 // Shipyard is a framework for e2e testing.
 type Shipyard struct {
-	options Options
 	cluster Cluster
 }
 
@@ -24,22 +25,23 @@ func New(workDir string) (*Shipyard, error) {
 		return nil, err
 	}
 
-	Log.Log("debug", fmt.Sprintf("Creating framework (baseDir=%v, workDir=%v)", baseDir, workDir))
-	Log.Log("debug", fmt.Sprintf("It can be accessed with 'kubectl --kubeconfig %s/kubernetes/config ...'", baseDir))
+	logger, _ := micrologger.New(micrologger.DefaultConfig())
+
+	logger.Log("debug", fmt.Sprintf("Creating framework (baseDir=%v, workDir=%v)", baseDir, workDir))
+	logger.Log("debug", fmt.Sprintf("It can be accessed with 'kubectl --kubeconfig %s/kubernetes/config ...'", baseDir))
 
 	if !canSudo() {
 		return nil, fmt.Errorf("e2e test requires `sudo` to be active. Run `sudo -v` before running the e2e test.")
 	}
-	keepSudoActive()
+	keepSudoActive(logger)
 
-	options := DefaultOptions(baseDir, workDir)
-	docker := NewDocker()
+	config := DefaultConfig(baseDir, workDir, logger)
+	docker := NewDocker(logger)
 
 	shipyard = &Shipyard{
-		options: options,
 		cluster: Cluster{
-			Options: options,
-			Docker:  docker,
+			Config: config,
+			Docker: docker,
 		},
 	}
 
@@ -70,10 +72,10 @@ func canSudo() bool {
 
 // keepSudoActive periodically updates the sudo timestamp so we can keep
 // running sudo.
-func keepSudoActive() {
+func keepSudoActive(logger micrologger.Logger) {
 	go func() {
 		if err := exec.Command("sudo", "-nv").Run(); err != nil {
-			Log.Log("debug", "Unable to keep sudo active: %v", err)
+			logger.Log("debug", "Unable to keep sudo active: %v", err)
 		}
 		time.Sleep(10 * time.Second)
 	}()

@@ -6,17 +6,50 @@ import (
 	"os/exec"
 	"path/filepath"
 	"time"
+
+	"github.com/giantswarm/micrologger"
 )
 
 const (
 	startupTimeout = 10 * time.Second
+	etcdImage      = "quay.io/coreos/etcd:v3.2.7"
+	hyperkubeImage = "gcr.io/google_containers/hyperkube:v1.7.6"
 )
 
 type taskFn func() error
 
+type Config struct {
+	logger micrologger.Logger
+
+	Docker  string
+	Kubectl string
+
+	BaseDir string
+	WorkDir string
+
+	EtcdImage      string
+	HyperkubeImage string
+}
+
+// DefaultConfig to use to run the e2e test.
+func DefaultConfig(baseDir string, workDir string, logger micrologger.Logger) Config {
+	return Config{
+		logger: logger,
+
+		Kubectl: "kubectl",
+
+		BaseDir: baseDir,
+		WorkDir: workDir,
+
+		Docker:         "docker",
+		EtcdImage:      etcdImage,
+		HyperkubeImage: hyperkubeImage,
+	}
+}
+
 // Cluster encapsulates a mock Kubernetes cluster.
 type Cluster struct {
-	Options
+	Config
 	Docker Docker
 
 	containers struct {
@@ -34,15 +67,15 @@ type Cluster struct {
 
 // SetUp the e2e cluster.
 func (cl *Cluster) SetUp() error {
-	Log.Log("debug", "SetUp")
+	cl.logger.Log("debug", "SetUp")
 
 	tasks := []taskFn{
 		cl.resolveDirs,
 		cl.pullImages,
 		cl.startEtcd,
-		cl.startApiServer,
+		cl.startAPIServer,
 		cl.startKubelet,
-		cl.waitForApiServer,
+		cl.waitForAPIServer,
 	}
 
 	return runTasks(tasks)
@@ -50,9 +83,9 @@ func (cl *Cluster) SetUp() error {
 
 // TearDown the e2e cluster.
 func (cl *Cluster) TearDown() error {
-	Log.Log("debug", "Teardown")
+	cl.logger.Log("debug", "Teardown")
 
-	tasks := []taskFn{cl.stopKubelet, cl.stopApiServer, cl.stopEtcd}
+	tasks := []taskFn{cl.stopKubelet, cl.stopAPIServer, cl.stopEtcd}
 
 	return runTasks(tasks)
 }
@@ -106,7 +139,7 @@ func (cl *Cluster) pullImages() error {
 }
 
 func (cl *Cluster) startEtcd() error {
-	Log.Log("debug", "Starting etcd")
+	cl.logger.Log("debug", "Starting etcd")
 
 	var err error
 	cl.containers.etcd, err = cl.Docker.Run("-d", "--net=host", cl.EtcdImage)
@@ -118,7 +151,7 @@ func (cl *Cluster) stopEtcd() error {
 		return nil
 	}
 
-	Log.Log("debug", "Stopping etcd")
+	cl.logger.Log("debug", "Stopping etcd")
 
 	if err := cl.Docker.Kill(cl.containers.etcd); err != nil {
 		return err
@@ -128,8 +161,8 @@ func (cl *Cluster) stopEtcd() error {
 	return nil
 }
 
-func (cl *Cluster) startApiServer() error {
-	Log.Log("debug", "Starting API server")
+func (cl *Cluster) startAPIServer() error {
+	cl.logger.Log("debug", "Starting API server")
 
 	var err error
 
@@ -149,12 +182,12 @@ func (cl *Cluster) startApiServer() error {
 	return err
 }
 
-func (cl *Cluster) stopApiServer() error {
+func (cl *Cluster) stopAPIServer() error {
 	if cl.containers.api == "" {
 		return nil
 	}
 
-	Log.Log("debug", "Stopping API server")
+	cl.logger.Log("debug", "Stopping API server")
 	if err := cl.Docker.Kill(cl.containers.api); err != nil {
 		return err
 	}
@@ -162,15 +195,15 @@ func (cl *Cluster) stopApiServer() error {
 	return nil
 }
 
-func (cl *Cluster) waitForApiServer() error {
+func (cl *Cluster) waitForAPIServer() error {
 	deadline := time.Now().Add(startupTimeout)
 
 	for time.Now().Before(deadline) {
 		if _, err := http.Get("http://localhost:8080"); err == nil {
-			Log.Log("debug", "API server started")
+			cl.logger.Log("debug", "API server started")
 			return nil
 		}
-		Log.Log("debug", "Waiting for API server to start")
+		cl.logger.Log("debug", "Waiting for API server to start")
 		time.Sleep(1 * time.Second)
 	}
 
@@ -178,13 +211,13 @@ func (cl *Cluster) waitForApiServer() error {
 }
 
 func (cl *Cluster) startKubelet() error {
-	Log.Log("debug", "Starting Kubelet")
+	cl.logger.Log("debug", "Starting Kubelet")
 
 	var err error
 
 	err = exec.Command("sudo", "mkdir", "-p", cl.varLibKubelet).Run()
 	if err != nil {
-		Log.Log("error", "Could not create %v: %v", cl.varLibKubelet, err)
+		cl.logger.Log("error", "Could not create %v: %v", cl.varLibKubelet, err)
 		return err
 	}
 
@@ -226,7 +259,7 @@ func (cl *Cluster) stopKubelet() error {
 		return nil
 	}
 
-	Log.Log("debug", "Stopping Kubelet")
+	cl.logger.Log("debug", "Stopping Kubelet")
 
 	cl.Docker.Kill(cl.containers.kubelet)
 	cl.containers.kubelet = ""
