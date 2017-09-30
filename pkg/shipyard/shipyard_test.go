@@ -85,7 +85,7 @@ func getK8sClient() (*kubernetes.Clientset, error) {
 }
 
 func TestLeak(t *testing.T) {
-	defer leaktest.CheckTimeout(t, 10*time.Second)()
+	defer leaktest.CheckTimeout(t, 15*time.Second)()
 
 	sy, err := shipyard.New()
 	if err != nil {
