@@ -1,0 +1,12 @@
+package: github.com/giantswarm/shipyard
+import:
+- package: github.com/giantswarm/micrologger
+  version: master
+- package: github.com/giantswarm/microstorage
+  version: master
+- package: github.com/giantswarm/microerror
+  version: master
+- package: k8s.io/client-go
+  version: v3.0.0
+- package: github.com/fortytw2/leaktest
+  version: v1.1.0

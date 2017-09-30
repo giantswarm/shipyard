@@ -1,0 +1,15 @@
+machine:
+  services:
+    - docker
+dependencies:
+  override:
+    # put dependencies in place, vendor is ignored
+    - mkdir -p ~/.go_workspace/src/github.com/${CIRCLE_PROJECT_USERNAME}
+    - ln -s ~/${CIRCLE_PROJECT_REPONAME} ${HOME}/.go_workspace/src/github.com/${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}
+    - cp -ar ./vendor/* ~/.go_workspace/src && rm -rf ./vendor
+    # do not ask for password on "sudo -v"
+    - echo "Defaults verifypw = any" | sudo tee -a /etc/sudoers
+test:
+  override:
+    - sudo -v
+    - go test -v ./pkg/shipyard/
