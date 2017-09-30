@@ -1,6 +1,8 @@
-hash: 68e29cd020a74b03b258dec84a6efa720cffaf36aafaecae07e98621aea99d74
-updated: 2017-09-29T15:08:04.498149867+02:00
+hash: 9d13afebc32420b81ae4a4269a095077ceefba75b0f93aaca1c9cf172fc19b1a
+updated: 2017-09-30T08:23:55.042201489+02:00
 imports:
+- name: github.com/fortytw2/leaktest
+  version: 7dad53304f9614c1c365755c1176a8e876fee3e8
 - name: github.com/giantswarm/microerror
   version: 5ade94eb4ee35ef72eb9382228470caeddb29989
 - name: github.com/giantswarm/micrologger

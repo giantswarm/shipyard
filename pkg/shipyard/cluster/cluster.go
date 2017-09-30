@@ -205,7 +205,8 @@ func (cl *Cluster) waitForAPIServer() error {
 	deadline := time.Now().Add(startupTimeout)
 
 	for time.Now().Before(deadline) {
-		if _, err := http.Get("http://localhost:8080"); err == nil {
+		if resp, err := http.Get("http://localhost:8080"); err == nil {
+			defer resp.Body.Close()
 			cl.logger.Log("debug", "API server started")
 			return nil
 		}

@@ -5,7 +5,9 @@ import (
 	"net/http"
 	"path/filepath"
 	"testing"
+	"time"
 
+	"github.com/fortytw2/leaktest"
 	"github.com/giantswarm/micrologger/microloggertest"
 	"github.com/giantswarm/microstorage/storagetest"
 	"github.com/giantswarm/shipyard/pkg/shipyard"
@@ -30,10 +32,11 @@ func TestShipyard(t *testing.T) {
 	defer sy.Stop()
 
 	t.Run("API up", func(t *testing.T) {
-		_, err = http.Get("http://127.0.0.1:8080")
+		resp, err := http.Get("http://127.0.0.1:8080")
 		if err != nil {
 			t.Fatalf("could not access api, %v", err)
 		}
+		resp.Body.Close()
 	})
 
 	t.Run("tpr storage example", func(t *testing.T) {
@@ -79,4 +82,18 @@ func getK8sClient() (*kubernetes.Clientset, error) {
 
 	// create the clientset
 	return kubernetes.NewForConfig(config)
+}
+
+func TestLeak(t *testing.T) {
+	defer leaktest.CheckTimeout(t, 10*time.Second)()
+
+	sy, err := shipyard.New()
+	if err != nil {
+		t.Fatalf("Could not start cluster: %v", err)
+	}
+
+	if err = sy.Start(); err != nil {
+		t.Fatalf("could not start framework, %v", err)
+	}
+	sy.Stop()
 }

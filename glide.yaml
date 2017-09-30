@@ -8,3 +8,5 @@ import:
   version: master
 - package: k8s.io/client-go
   version: v3.0.0
+- package: github.com/fortytw2/leaktest
+  version: v1.1.0

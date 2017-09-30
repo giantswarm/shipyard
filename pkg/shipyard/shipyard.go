@@ -72,16 +72,18 @@ func canSudo() bool {
 // keepSudoActive periodically updates the sudo timestamp so we can keep
 // running sudo.
 func keepSudoActive(logger micrologger.Logger, cancel <-chan struct{}) {
+	ticker := time.NewTicker(10 * time.Second)
+
 	go func() {
 		for {
 			select {
 			case <-cancel:
+				ticker.Stop()
 				return
-			default:
+			case <-ticker.C:
 				if err := exec.Command("sudo", "-nv").Run(); err != nil {
 					logger.Log("debug", "Unable to keep sudo active: %v", err)
 				}
-				time.Sleep(10 * time.Second)
 			}
 		}
 	}()
