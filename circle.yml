@@ -23,12 +23,11 @@ test:
       image_id=""
 
       cleanup(){
-        aws ec2 deregister-image --image-id $image_id
+        aws ec2 deregister-image --image-id $image_id --region eu-central-1
       }
 
-      trap cleanup EXIT
-
       packer build -machine-readable ./image/minikube.json | tee packer_result
+      trap cleanup EXIT
       image_id=$(cat packer_result | grep "artifact,0,id" | cut -d ':' -f 2)
 
       ./image/run-checks.sh $image_id
