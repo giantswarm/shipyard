@@ -1,0 +1,33 @@
+machine:
+  environment:
+    HELM_VER: v2.6.2
+    PACKER_VER: 1.1.0
+
+  services:
+    - docker
+dependencies:
+  override:
+    # aws cli
+    - pip install awscli -q -q -q --upgrade --user
+    # kubectl
+    - curl -s -LO https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/amd64/kubectl && chmod +x ./kubectl && sudo mv ./kubectl /usr/local/bin
+    # helm
+    - curl -s -Lo helm.tgz https://storage.googleapis.com/kubernetes-helm/helm-${HELM_VER}-linux-amd64.tar.gz && tar -zxvf helm.tgz && mv ./linux-amd64/helm . && chmod +x ./helm && sudo mv ./helm /usr/local/bin
+    # helm registry plugin
+    - mkdir -p ~/.helm/plugins/ && cd ~/.helm/plugins/ && git clone https://github.com/app-registry/appr-helm-plugin.git registry && helm registry --help
+    # packer
+    - curl -s -Lo packer.zip https://releases.hashicorp.com/packer/${PACKER_VER}/packer_${PACKER_VER}_linux_amd64.zip && unzip packer.zip && chmod a+x packer && sudo mv packer /usr/local/bin
+test:
+  override:
+    - |
+      image_id=""
+
+      cleanup(){
+        aws ec2 deregister-image --image-id $image_id --region eu-central-1
+      }
+
+      packer build -machine-readable ./image/minikube.json | tee packer_result
+      trap cleanup EXIT
+      image_id=$(cat packer_result | grep "artifact,0,id" | cut -d ':' -f 2)
+
+      ./image/run-checks.sh $image_id
