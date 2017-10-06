@@ -28,7 +28,7 @@ test:
 
       trap cleanup EXIT
 
-      packer build --machine-readable ./image/minikube.json | tee packer_result
+      packer build -machine-readable ./image/minikube.json | tee packer_result
       image_id=$(cat packer_result | grep "artifact,0,id" | cut -d ':' -f 2)
 
       ./image/run-checks.sh $image_id

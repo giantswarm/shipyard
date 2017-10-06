@@ -82,5 +82,7 @@ while ! kubectl get thirdpartyresources | grep -Pz "$expected"; do
     sleep 1
 done
 
+sleep 5
+
 helm registry install quay.io/giantswarm/cert-resource-lab-chart -- \
        -n cert-resource-lab
