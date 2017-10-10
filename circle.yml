@@ -17,17 +17,34 @@ dependencies:
     - mkdir -p ~/.helm/plugins/ && cd ~/.helm/plugins/ && git clone https://github.com/app-registry/appr-helm-plugin.git registry && helm registry --help
     # packer
     - curl -s -Lo packer.zip https://releases.hashicorp.com/packer/${PACKER_VER}/packer_${PACKER_VER}_linux_amd64.zip && unzip packer.zip && chmod a+x packer && sudo mv packer /usr/local/bin
+    # put dependencies in place, vendor is ignored
+    - mkdir -p ~/.go_workspace/src/github.com/${CIRCLE_PROJECT_USERNAME}
+    - ln -s ~/${CIRCLE_PROJECT_REPONAME} ${HOME}/.go_workspace/src/github.com/${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}
+    - cp -ar ./vendor/* ~/.go_workspace/src && rm -rf ./vendor
 test:
   override:
+    - cd ${HOME}/.go_workspace/src/github.com/${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME} && go get ./cmd/shipyard
+    - go test -v ./pkg/...
     - |
       image_id=""
-
       cleanup(){
         aws ec2 deregister-image --image-id $image_id --region eu-central-1
       }
+      build_image(){
+        packer build -machine-readable ./image/minikube.json | tee packer_result
+        if [ "$CIRCLE_BRANCH" != master ]; then
+          # do not keep images built from branches
+          trap cleanup EXIT
+        fi
+        image_id=$(cat packer_result | grep "artifact,0,id" | cut -d ':' -f 2)
+        echo $image_id
+      }
 
-      packer build -machine-readable ./image/minikube.json | tee packer_result
-      trap cleanup EXIT
-      image_id=$(cat packer_result | grep "artifact,0,id" | cut -d ':' -f 2)
-
-      ./image/run-checks.sh $image_id
+      changed_files="$(git log -m -1 --name-only --pretty=format:)"
+      for file in $changed_files; do
+        if echo "$file" | grep -q "^image/minikube.json"; then
+          image_id=$(build_image)
+          ./image/run-checks.sh $image_id
+          break
+        fi
+      done
