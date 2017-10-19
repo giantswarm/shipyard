@@ -6,7 +6,7 @@ import (
 	"io/ioutil"
 	"os"
 	"os/exec"
-	"os/user"
+	"path/filepath"
 	"strings"
 	"time"
 
@@ -323,17 +323,14 @@ func (e *Engine) getAssets(res *result) (*result, error) {
 	if err != nil {
 		return nil, err
 	}
-	user, err := user.Current()
+	dir, err := os.Getwd()
 	if err != nil {
 		return nil, err
 	}
+	baseDir := filepath.Join(dir, ".shipyard")
 	kubeconfigContent = strings.Replace(kubeconfigContent,
-		"/home/ubuntu",
-		user.HomeDir,
-		-1)
-	kubeconfigContent = strings.Replace(kubeconfigContent,
-		"minikube",
-		"shipyard",
+		"/home/ubuntu/.minikube",
+		baseDir,
 		-1)
 	res.kubeconfigContent = kubeconfigContent
 
