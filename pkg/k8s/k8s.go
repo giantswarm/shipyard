@@ -6,6 +6,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/giantswarm/shipyard/pkg/files"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
 )
@@ -18,10 +19,13 @@ func GetClient(ci bool) (*kubernetes.Clientset, error) {
 
 	var configDir, server string
 	if ci {
-		configDir = ".shipyard"
+		configDir, err = files.GetBaseDir()
+		if err != nil {
+			return nil, err
+		}
 		server = "127.0.0.1"
 	} else {
-		configDir = ".minikube"
+		configDir = filepath.Join(user.HomeDir, ".minikube")
 		out, err := exec.Command("minikube", "ip").Output()
 		if err != nil {
 			return nil, err
@@ -30,9 +34,9 @@ func GetClient(ci bool) (*kubernetes.Clientset, error) {
 		server = string(minikubeIP)
 	}
 
-	crtFile := filepath.Join(user.HomeDir, configDir, "client.crt")
-	keyFile := filepath.Join(user.HomeDir, configDir, "client.key")
-	caFile := filepath.Join(user.HomeDir, configDir, "ca.crt")
+	crtFile := filepath.Join(configDir, "client.crt")
+	keyFile := filepath.Join(configDir, "client.key")
+	caFile := filepath.Join(configDir, "ca.crt")
 
 	config := &rest.Config{
 		Host: "https://" + server + ":8443",

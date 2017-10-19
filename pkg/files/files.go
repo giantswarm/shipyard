@@ -3,12 +3,15 @@ package files
 import (
 	"io/ioutil"
 	"os"
-	"os/user"
 	"path/filepath"
 
 	"github.com/giantswarm/shipyard/pkg/engine"
 	"github.com/spf13/afero"
 	yaml "gopkg.in/yaml.v2"
+)
+
+const (
+	configFile = "shipyard.yaml"
 )
 
 type Handler struct {
@@ -39,12 +42,10 @@ func (h *Handler) Write(res *engine.Result) error {
 }
 
 func (h *Handler) writeCerts(res *engine.Result) error {
-	user, err := user.Current()
+	baseDir, err := GetBaseDir()
 	if err != nil {
 		return err
 	}
-
-	baseDir := filepath.Join(user.HomeDir, ".shipyard")
 	if err := h.fs.MkdirAll(baseDir, 0755); err != nil {
 		return err
 	}
@@ -74,12 +75,10 @@ func (h *Handler) writeCerts(res *engine.Result) error {
 }
 
 func (h *Handler) writeKubeConfig(res *engine.Result) error {
-	user, err := user.Current()
+	baseDir, err := GetBaseDir()
 	if err != nil {
 		return err
 	}
-
-	baseDir := filepath.Join(user.HomeDir, ".shipyard")
 	if err := h.fs.MkdirAll(baseDir, 0755); err != nil {
 		return err
 	}
@@ -94,7 +93,7 @@ func (h *Handler) writeKubeConfig(res *engine.Result) error {
 }
 
 func (h *Handler) writeShipyardCfg(res *engine.Result) error {
-	dir, err := os.Getwd()
+	dir, err := GetBaseDir()
 	if err != nil {
 		return err
 	}
@@ -104,7 +103,7 @@ func (h *Handler) writeShipyardCfg(res *engine.Result) error {
 		return err
 	}
 	if err := ioutil.WriteFile(
-		filepath.Join(dir, ".shipyard.yaml"),
+		filepath.Join(dir, configFile),
 		[]byte(content),
 		0644); err != nil {
 		return err
@@ -114,12 +113,12 @@ func (h *Handler) writeShipyardCfg(res *engine.Result) error {
 }
 
 func (h *Handler) ReadShipyardCfg() (*engine.Result, error) {
-	dir, err := os.Getwd()
+	dir, err := GetBaseDir()
 	if err != nil {
 		return nil, err
 	}
 
-	content, err := ioutil.ReadFile(filepath.Join(dir, ".shipyard.yaml"))
+	content, err := ioutil.ReadFile(filepath.Join(dir, configFile))
 	if err != nil {
 		return nil, err
 	}
@@ -130,4 +129,13 @@ func (h *Handler) ReadShipyardCfg() (*engine.Result, error) {
 		return nil, err
 	}
 	return e, nil
+}
+
+func GetBaseDir() (string, error) {
+	dir, err := os.Getwd()
+	if err != nil {
+		return "", err
+	}
+
+	return filepath.Join(dir, ".shipyard"), nil
 }

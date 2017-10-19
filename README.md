@@ -39,10 +39,10 @@ can create a shipyard instance with:
 ```bash
 $ shipyard
 ```
-After setting `KUBECONFIG` to `$HOME/.shipyard/config`  kubectl access the remote cluster:
+After setting `KUBECONFIG` to `./.shipyard/config`  kubectl access the remote cluster:
 
 ```bash
-$ export KUBECONFIG=$HOME/.shipyard/config
+$ export KUBECONFIG=./.shipyard/config
 $ kubectl get cs
 NAME                 STATUS    MESSAGE              ERROR
 scheduler            Healthy   ok
