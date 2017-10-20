@@ -88,10 +88,11 @@ func (h *Handler) writeKubeConfig(res *engine.Result) error {
 	if err := h.fs.MkdirAll(baseDir, 0755); err != nil {
 		return err
 	}
-	if err := ioutil.WriteFile(
+	err = ioutil.WriteFile(
 		filepath.Join(baseDir, "config"),
 		[]byte(res.KubeconfigContent),
-		0644); err != nil {
+		0644)
+	if err != nil {
 		return err
 	}
 
@@ -106,10 +107,11 @@ func (h *Handler) writePrivateKey(res *engine.Result) error {
 	if err := h.fs.MkdirAll(baseDir, 0755); err != nil {
 		return err
 	}
-	if err := ioutil.WriteFile(
+	err = ioutil.WriteFile(
 		filepath.Join(baseDir, privateKeyFile),
 		[]byte(res.PrivateKeyContent),
-		0644); err != nil {
+		0644)
+	if err != nil {
 		return err
 	}
 
@@ -126,10 +128,11 @@ func (h *Handler) writeShipyardCfg(res *engine.Result) error {
 	if err != nil {
 		return err
 	}
-	if err := ioutil.WriteFile(
+	err = ioutil.WriteFile(
 		filepath.Join(dir, configFile),
 		[]byte(content),
-		0644); err != nil {
+		0644)
+	if err != nil {
 		return err
 	}
 
