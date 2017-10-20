@@ -11,7 +11,8 @@ import (
 )
 
 const (
-	configFile = "shipyard.yaml"
+	configFile     = "shipyard.yaml"
+	privateKeyFile = "instance.pem"
 )
 
 type Handler struct {
@@ -30,6 +31,11 @@ func (h *Handler) Write(res *engine.Result) error {
 
 	// kubeconfig
 	if err := h.writeKubeConfig(res); err != nil {
+		return err
+	}
+
+	// instance private key
+	if err := h.writePrivateKey(res); err != nil {
 		return err
 	}
 
@@ -92,6 +98,24 @@ func (h *Handler) writeKubeConfig(res *engine.Result) error {
 	return nil
 }
 
+func (h *Handler) writePrivateKey(res *engine.Result) error {
+	baseDir, err := GetBaseDir()
+	if err != nil {
+		return err
+	}
+	if err := h.fs.MkdirAll(baseDir, 0755); err != nil {
+		return err
+	}
+	if err := ioutil.WriteFile(
+		filepath.Join(baseDir, privateKeyFile),
+		[]byte(res.PrivateKeyContent),
+		0644); err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func (h *Handler) writeShipyardCfg(res *engine.Result) error {
 	dir, err := GetBaseDir()
 	if err != nil {
@@ -128,6 +152,12 @@ func (h *Handler) ReadShipyardCfg() (*engine.Result, error) {
 	if err := yaml.Unmarshal(content, e); err != nil {
 		return nil, err
 	}
+
+	privateKeyContent, err := ioutil.ReadFile(filepath.Join(dir, privateKeyFile))
+	if err != nil {
+		return nil, err
+	}
+	e.PrivateKeyContent = string(privateKeyContent)
 	return e, nil
 }
 

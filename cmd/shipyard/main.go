@@ -14,7 +14,7 @@ import (
 )
 
 var (
-	action = flag.String("action", "start", "action to accomplish, valid values 'start' and 'stop'")
+	action = flag.String("action", "start", "action to accomplish, valid values 'start', 'stop' and 'forward-port'")
 	name   = flag.String("name", "", "build name, if none is provided a random one will be generated")
 )
 
@@ -46,6 +46,11 @@ func main() {
 	case "stop":
 		if err := sy.Stop(); err != nil {
 			logger.Log("error", fmt.Sprintf("Could not stop shipyard: %v", err))
+			os.Exit(1)
+		}
+	case "forward-port":
+		if err := sy.ForwardPort(); err != nil {
+			logger.Log("error", fmt.Sprintf("Could not forward-port: %v", err))
 			os.Exit(1)
 		}
 	default:

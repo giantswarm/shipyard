@@ -156,6 +156,18 @@ func (e *Engine) TearDown(res *engine.Result) (*engine.Result, error) {
 	return e.executeStages(e.result, stages)
 }
 
+func (e *Engine) ForwardPort(res *engine.Result) (*engine.Result, error) {
+	e.name = res.ClusterID
+	e.result = &result{
+		instanceIP:        res.InstanceIP,
+		privateKeyContent: res.PrivateKeyContent,
+	}
+	stages := []stage{
+		e.forwardPort,
+	}
+	return e.executeStages(e.result, stages)
+}
+
 func (e *Engine) executeStages(res *result, stages []stage) (*engine.Result, error) {
 	var err error
 	for _, s := range stages {
@@ -172,6 +184,7 @@ func (e *Engine) executeStages(res *result, stages []stage) (*engine.Result, err
 		ClientKeyContent:  res.clientKeyContent,
 		KubeconfigContent: res.kubeconfigContent,
 		InstanceIP:        res.instanceIP,
+		PrivateKeyContent: res.privateKeyContent,
 	}, nil
 }
 
