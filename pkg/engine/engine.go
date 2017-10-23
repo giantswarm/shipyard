@@ -8,10 +8,12 @@ type Result struct {
 	ClientCrtContent  string `yaml:"-"`
 	ClientKeyContent  string `yaml:"-"`
 	KubeconfigContent string `yaml:"-"`
+	PrivateKeyContent string `yaml:"-"`
 }
 
 // Engine abstracts the required functionality of a test cluster
 type Engine interface {
 	SetUp() (*Result, error)
 	TearDown(res *Result) (*Result, error)
+	ForwardPort(res *Result) (*Result, error)
 }

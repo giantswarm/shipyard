@@ -42,3 +42,14 @@ func (sy *Shipyard) Stop() error {
 	_, err = sy.engine.TearDown(initialResult)
 	return err
 }
+
+// ForwardPort sets up the ssh port forwarding.
+func (sy *Shipyard) ForwardPort() error {
+	sy.logger.Log("info", "Forwarding port...")
+	initialResult, err := sy.filesHandler.ReadShipyardCfg()
+	if err != nil {
+		return err
+	}
+	_, err = sy.engine.ForwardPort(initialResult)
+	return err
+}
