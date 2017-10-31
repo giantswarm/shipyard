@@ -37,8 +37,9 @@
             "sudo apt install -y socat",
 
             "echo FIX ME: two calls to *minikube start* are needed, the first one does not create the required systemd units",
-            "sudo CHANGE_MINIKUBE_NONE_USER=true minikube start --vm-driver=none -v 3",
-            "sudo CHANGE_MINIKUBE_NONE_USER=true minikube start --vm-driver=none -v 3",
+            "echo upstream issue: https://github.com/kubernetes/minikube/issues/2138",
+            "sudo CHANGE_MINIKUBE_NONE_USER=true minikube start --extra-config=apiserver.Authorization.Mode=RBAC --vm-driver=none -v 3",
+            "sudo CHANGE_MINIKUBE_NONE_USER=true minikube start --extra-config=apiserver.Authorization.Mode=RBAC --vm-driver=none -v 3",
             "sudo systemctl enable --now localkube.service",
 
             "while ! kubectl get svc | grep -Pz \"kubernetes *\"; do echo waiting for kubernetes svc...; sleep 20; done"
