@@ -53,4 +53,4 @@ deployment:
   master:
     branch: master
     commands:
-    - ./github-release.sh $CIRCLE_SHA1 $PERSONAL_ACCESS_TOKEN
+    - ./github-release.sh $CIRCLE_SHA1 $PERSONAL_ACCESS_TOKEN $CIRCLE_PROJECT_REPONAME
