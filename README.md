@@ -1,6 +1,6 @@
 # Shipyard
 
-[![CircleCI](https://circleci.com/gh/giantswarm/shipyard.svg?style=svg)](https://circleci.com/gh/giantswarm/shipyard)
+[![CircleCI](https://circleci.com/gh/giantswarm/shipyard.svg?style=shield)](https://circleci.com/gh/giantswarm/shipyard)
 
 Creates thin kubernetes environments for automated testing.
 
